@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 		(struct sockaddr *) &cli_addr, &clilen);
 		if (newsockfd < 0)
 			error("ERROR on accept");
-			pid = fork();
+			pid_t pid = fork();
 		if (pid < 0)
 			error("ERROR on fork");
 	if (pid == 0){
