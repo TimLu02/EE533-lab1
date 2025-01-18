@@ -11,11 +11,11 @@ void error(char *msg)
     perror(msg);
     exit(1);
 }
-void dostuff(int sockfd)
+void dostuff(int newsockfd)
 {
 	 char buffer[256];
 	 bzero(buffer,256);
-     n = read(newsockfd,buffer,255);
+     int n = read(newsockfd,buffer,255);
      if (n < 0) error("ERROR reading from socket");
      printf("Here is the message: %s\n",buffer);
      n = write(newsockfd,"I got your message",18);
