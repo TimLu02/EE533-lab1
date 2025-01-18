@@ -3,7 +3,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h> 
-
+#include <string.h>
 void error(char *msg)
 {
     perror(msg);
@@ -40,11 +40,13 @@ int main(int argc, char *argv[])
 	while(1){
 		 bzero(buffer,1024);
 		fgets(buffer,1023,stdin);
-		fromlen=sizeof(struct sockaddr_in);
-		int n = sendto(sock,buffer,strlen(buffer), 0,(struct sockaddr *) &server_addr,&fromlen);
+		socklen_t fromlen=sizeof(struct sockaddr_in);
+		int n = sendto(sockfd,buffer,strlen(buffer), 0,(struct sockaddr *) &serv_addr,sizeof(serv_addr));
 		if (n < 0)
 		error("sendto"); 
-		n = recvfrom(sockfd,buffer,1024,0,(struct sockaddr* )&server_addr,&fromlen);
+		//printf("check\n");
+		bzero(buffer,1024);
+		n = recvfrom(sockfd,buffer,1024,0,(struct sockaddr* )&serv_addr,&fromlen);
 		if(n<0)error("recvfrom");
 		printf("The message is %s\n",buffer); 
 	}
