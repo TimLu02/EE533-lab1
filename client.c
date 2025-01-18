@@ -17,13 +17,13 @@ int main(int argc, char *argv[])
     struct sockaddr_in serv_addr;
     struct hostent *server;
 
-    char buffer[256];
+    char buffer[1024];
     if (argc < 3) {
        fprintf(stderr,"usage %s hostname port\n", argv[0]);
        exit(0);
     }
     portno = atoi(argv[2]);
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0) 
         error("ERROR opening socket");
     server = gethostbyname(argv[1]);
@@ -37,18 +37,20 @@ int main(int argc, char *argv[])
          (char *)&serv_addr.sin_addr.s_addr,
          server->h_length);
     serv_addr.sin_port = htons(portno);
-    if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0) 
-        error("ERROR connecting");
-    printf("Please enter the message: ");
-    bzero(buffer,256);
-    fgets(buffer,255,stdin);
-    n = write(sockfd,buffer,strlen(buffer));
-    if (n < 0) 
-         error("ERROR writing to socket");
-    bzero(buffer,256);
-    n = read(sockfd,buffer,255);
-    if (n < 0) 
-         error("ERROR reading from socket");
-    printf("%s\n",buffer);
+	while(1){
+		 bzero(buffer,1024);
+		fgets(buffer,1023,stdin);
+		fromlen=sizeof(struct sockaddr_in);
+		int n = sendto(sock,buffer,strlen(buffer), 0,(struct sockaddr *) &server_addr,&fromlen);
+		if (n < 0)
+		error("sendto"); 
+		n = recvfrom(sockfd,buffer,1024,0,(struct sockaddr* )&server_addr,&fromlen);
+		if(n<0)error("recvfrom");
+		printf("The message is %s\n",buffer); 
+	}
+   
+    
+	
+	
     return 0;
 }

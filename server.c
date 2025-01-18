@@ -11,7 +11,7 @@ void error(char *msg)
     perror(msg);
     exit(1);
 }
-void dostuff(int newsockfd)
+/*void dostuff(int newsockfd)
 {
 	 char buffer[256];
 	 bzero(buffer,256);
@@ -22,19 +22,20 @@ void dostuff(int newsockfd)
      if (n < 0) error("ERROR writing to socket");
 	 return;
 }
+*/
 int main(int argc, char *argv[])
 {
 	// kill zombie process
 	signal(SIGCHLD,SIG_IGN);
      int sockfd, newsockfd, portno, clilen;
-     //char buffer[256];
+     char buffer[1024];
      struct sockaddr_in serv_addr, cli_addr;
      int n;
      if (argc < 2) {
          fprintf(stderr,"ERROR, no port provided\n");
          exit(1);
      }
-     sockfd = socket(AF_INET, SOCK_STREAM, 0);
+     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
      if (sockfd < 0) 
         error("ERROR opening socket");
      bzero((char *) &serv_addr, sizeof(serv_addr));
@@ -42,35 +43,22 @@ int main(int argc, char *argv[])
      serv_addr.sin_family = AF_INET;
      serv_addr.sin_addr.s_addr = INADDR_ANY;
      serv_addr.sin_port = htons(portno);
-     if (bind(sockfd, (struct sockaddr *) &serv_addr,
-              sizeof(serv_addr)) < 0) 
-              error("ERROR on binding");
-     listen(sockfd,5);
-     clilen = sizeof(cli_addr);
+     //if (bind(sockfd, (struct sockaddr *) &serv_addr,
+       //       sizeof(serv_addr)) < 0) 
+         //     error("ERROR on binding");
+     //listen(sockfd,5);
+     fromlen=sizeof(struct sockaddr_in);
 	 while (1){
-		newsockfd = accept(sockfd,
-		(struct sockaddr *) &cli_addr, &clilen);
-		if (newsockfd < 0)
-			error("ERROR on accept");
-			pid_t pid = fork();
-		if (pid < 0)
-			error("ERROR on fork");
-	if (pid == 0){
-		close(sockfd);
-		dostuff(newsockfd);
-		exit(0);
-	}
-	else
-	close(newsockfd);
-}
+		n = recvfrom(sockfd,buffer,1024,0,(struct sockaddr* )&cli_addr,&fromlen);
+		if(n<0)error("recvfrom");
+		printf("The message is %s\n",buffer); 
+		n = sendto(sock,"Got your message",17, 0,(struct sockaddr *) &cli_addr,&fromlen);
+		if (n < 0)
+		error("sendto"); 
+	 }
+
 	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
+	
 
      
      return 0; 
